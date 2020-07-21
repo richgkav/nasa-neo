@@ -1,0 +1,25 @@
+	fetch(fetchQuery, {
+		mode: 'cors'
+	})
+	.then(function(response) {
+		return response.json();
+	})
+	.then(function(response) {
+
+		log(response.element_count.toString() + ' asteroids');
+
+		const allData = response.near_earth_objects;
+		log(allData);
+
+		for (const date in allData) {
+
+			const dateData = allData[date];
+
+			for (const astData in dateData) {
+				const asteroid = dateData[astData];
+				log (asteroid.name);
+			}
+
+		}
+
+	});

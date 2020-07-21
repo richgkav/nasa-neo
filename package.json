@@ -1,0 +1,17 @@
+{
+  "name": "nasa-neo",
+  "version": "0.0.1",
+  "description": "Display NASA NEO - Near Earth Object data",
+  "main": "nasa-neo-feed.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Richard G Kavanagh",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^3.6.0",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
+  }
+}
