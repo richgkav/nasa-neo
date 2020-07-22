@@ -10,9 +10,14 @@ const main = function _main() {
 
 	//log('Running OK');
 	//log({test1: 'test', test2: 'test2', test3: 'test3'});
-	//log(createQuery('2020-07-01','2020-07-07'));
+	//log(createQuery('2020-07-01','2020-07-07'))
 	
-	const fetchQuery = createQuery('2020-07-01','2020-07-07');
+	const dateFrom = '2020-07-13';
+	const dateTo = '2020-07-19';
+
+	document.getElementById('title').innerText = `Close Approaches ${dateFrom} to ${dateTo}`;
+	
+	const fetchQuery = createQuery(dateFrom, dateTo);
 	
 	fetch(fetchQuery, {
 		mode: 'cors'
@@ -24,10 +29,12 @@ const main = function _main() {
 		
 		//log(response.element_count.toString() + ' asteroids');
 		
-		const allData = response.near_earth_objects;
-		log(allData);
-		const selectedData = pickData(allData);
-		renderData(selectedData);
+		const responseObject = response.near_earth_objects;
+		log(responseObject);
+		const asteroidsArray = fillAsteroidsArray(responseObject);
+		//sortArray(asteroidsArray, 'date');
+		sortArray(asteroidsArray, 'diameter');
+		renderData(asteroidsArray);
 	});
 	
 	function createQuery(start, end) {
@@ -36,14 +43,16 @@ const main = function _main() {
 		return url+'start_date='+start+'&end_date='+end+'&api_key='+key;
 	}
 	
-	function pickData(allData) {
+	function fillAsteroidsArray(responseObject) {
 		
 		const asteroids = [];
 
-		for (const date in allData) {
-			const dateData = allData[date];
+		for (const date in responseObject) {
+
+			const dateData = responseObject[date];
 
 			for (const astData in dateData) {
+
 				const astDataObj = dateData[astData];
 				const asteroid = new Asteroid(
 					astDataObj.name,
@@ -55,15 +64,19 @@ const main = function _main() {
 					twoDecPlaces(astDataObj.close_approach_data[0].relative_velocity.kilometers_per_second)
 				);
 				asteroids.push(asteroid);
-				//log(asteroid.date);
+				
 			}
 		}
-
-		asteroids.sort(function(a,b) {
-			return a.date - b.date;
+		return asteroids;
+	}
+	
+	function sortArray(array, property) {
+		
+		array.sort(function(a,b) {
+			//return a.date - b.date;
+			return a[property] - b[property];
 		});
 
-		return asteroids;
 	}
 
 	function renderData(asteroids) {
@@ -79,7 +92,7 @@ const main = function _main() {
 			asteroidDiv.appendChild(renderAsteroidDataBox('Diameter (meters)', asteroid.diameter));
 			asteroidDiv.appendChild(renderAsteroidDataBox('Hazard?', asteroid.potentialHazard));
 			asteroidDiv.appendChild(renderAsteroidLink('URL', asteroid.urlNasa));
-			asteroidDiv.appendChild(renderAsteroidDataBox('Date of Close Approach', asteroid.closeApproachDateFull));
+			asteroidDiv.appendChild(renderAsteroidDataBox('Date', asteroid.closeApproachDateFull));
 			asteroidDiv.appendChild(renderAsteroidDataBox('Distance (km)', asteroid.closeApproachDistance));
 			asteroidDiv.appendChild(renderAsteroidDataBox('Velocity (m/s)', asteroid.closeApproachVelocity));
 
@@ -89,28 +102,39 @@ const main = function _main() {
 	// ---------------------------------------------------------------------------//
 	
 	function renderAsteroidDataBox(title, asteroidData) {
-		
-		const divs = renderAstDataBox(title, asteroidData);
+		const divs = renderDivs(title, asteroidData);
 		divs.asteroidDataDiv.innerText = asteroidData;
-		divs.asteroidDataBox.appendChild(divs.asteroidTitleDiv);
-		divs.asteroidDataBox.appendChild(divs.asteroidDataDiv);
+
+		if (title === "Hazard?" && asteroidData === true) {
+			divs.asteroidDataBox.classList.add('cell-highlight');
+		}
+		if (title === "Distance (km)" && asteroidData < 384400) {
+			divs.asteroidDataBox.classList.add('cell-highlight');
+		}
+		if (title === "Diameter (meters)" && asteroidData > 1000) {
+			divs.asteroidDataBox.classList.add('cell-highlight');
+		}
+		if (title === "Velocity (m/s)" && asteroidData > 25) {
+			divs.asteroidDataBox.classList.add('cell-highlight');
+		}
+
 		return divs.asteroidDataBox;
 	}
 	
 	function renderAsteroidLink(title, asteroidData) {
-		const divs = renderAstDataBox(title, asteroidData);
+		const divs = renderDivs(title, asteroidData);
 		divs.asteroidDataDiv.innerHTML = addLink(asteroidData, 'nasa url');
-		divs.asteroidDataBox.appendChild(divs.asteroidTitleDiv);
-		divs.asteroidDataBox.appendChild(divs.asteroidDataDiv);
 		return divs.asteroidDataBox;
 	}
 	
-	function renderAstDataBox(title, asteroidData) {
+	function renderDivs(title, asteroidData) {
 		const asteroidDataBox = newDiv('asteroid-databox')
 		asteroidDataBox.classList.add('cell-colour');
 		const asteroidTitleDiv = newDiv('asteroid-title');
 		asteroidTitleDiv.innerText = title;
 		const asteroidDataDiv = newDiv('asteroid-data');
+		asteroidDataBox.appendChild(asteroidTitleDiv);
+		asteroidDataBox.appendChild(asteroidDataDiv);
 		return {asteroidDataBox, asteroidTitleDiv, asteroidDataDiv};
 	}
 // ---------------------------------------------------------------------------//
