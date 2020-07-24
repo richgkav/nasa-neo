@@ -5,21 +5,33 @@
 
 import "./index.css";
 import {Asteroid} from './asteroid';
+import {format, add} from 'date-fns';
 
 const main = function _main() {
 
-	//log('Running OK');
-	//log({test1: 'test', test2: 'test2', test3: 'test3'});
-	//log(createQuery('2020-07-01','2020-07-07'))
-	
 	const dateFrom = '2020-07-01';
-	const dateTo = '2020-07-07';
+	const dateTo = '2020-07-08';
+
+	let date = {
+		from: new Date(dateFrom + ' 00:00:00'),
+		to: new Date(dateTo + ' 23:59:59'),
+	};
+
+	let dateFromString = format(date.from, 'yyyy-MM-dd');
+	let dateToString = format(date.to, 'yyyy-MM-dd');
+
+	//log(dateFromString);
+	//log(dateToString);
+
+	// need to convert date to something nasa api will accept
+	// yyyy-mm-dd
+
 	let asteroidsArray = [];
 
 	document.getElementById('title').innerText = 
-		`Near Earth Object - Asteroid Approaches - ${dateFrom} to ${dateTo}`;
+	`Near Earth Object - Asteroid Approaches - ${dateFromString} to ${dateToString}`;
 	
-	const fetchQuery = createQuery(dateFrom, dateTo);
+	const fetchQuery = createQuery(dateFromString, dateToString);
 	
 	fetch(fetchQuery, {
 		mode: 'cors'
@@ -28,13 +40,12 @@ const main = function _main() {
 		return response.json();
 	})
 	.then(function(response) {
-
 		log(response);
 		asteroidsArray = fillAsteroidsArray(response);
 		renderAsteroidData(asteroidsArray);
 		log(typeof asteroidsArray[0].closeApproachVelocity);
 	});
-
+	
 	// true doesn't mean a specific direction it's just a flip-flop flag
 	let sortDirection = {
 		name: true,
@@ -44,86 +55,51 @@ const main = function _main() {
 		distance: true,
 		velocity: true,
 	};
-
-	addSortClickEvents();
-
-	function addSortClickEvents() {
-
-		document.getElementById('ast-name').addEventListener('click', () => {
-			//log('name clicked');
-
-			if (sortDirection.name === true) {
-				sortArray(asteroidsArray, 'name', true);
-				sortDirection.name = false;	// flip the direction for next sort
+	
+	//addSortClickEvents();
+	newAddSortClickEvents('ast-name', sortDirection.name, 'name');
+	newAddSortClickEvents('ast-diameter', sortDirection.diameter, 'diameter');
+	newAddSortClickEvents('ast-hazard', sortDirection.potentialHazard, 'potentialHazard');
+	newAddSortClickEvents('ast-date', sortDirection.date, 'date');
+	newAddSortClickEvents('ast-distance', sortDirection.closeApproachDistance, 'closeApproachDistance');
+	newAddSortClickEvents('ast-velocity', sortDirection.closeApproachVelocity, 'closeApproachVelocity');
+	
+	// add click events to css title div to sort array data by that column
+	function newAddSortClickEvents(cssIdName, sortDirectionProp, arrayProp) {
+		document.getElementById(cssIdName).addEventListener('click', () => {
+			if (sortDirectionProp === true) {
+				sortArray(asteroidsArray, arrayProp, true);
+				sortDirectionProp = false;	// flip the direction for next sort
 			}
 			else {
-				sortArray(asteroidsArray, 'name', false);
-				sortDirection.name = true;
+				sortArray(asteroidsArray, arrayProp, false);
+				sortDirectionProp = true;
 			}
 			renderAsteroidData(asteroidsArray);
 		});
-		
-		document.getElementById('ast-diameter').addEventListener('click', () => {
-			if (sortDirection.diameter === true) {
-				sortArray(asteroidsArray, 'diameter', true);
-				sortDirection.diameter = false;	// flip the direction for next sort
-			}
-			else {
-				sortArray(asteroidsArray, 'diameter', false);
-				sortDirection.diameter = true;
-			}
-			renderAsteroidData(asteroidsArray);
-		});
-
-		document.getElementById('ast-hazard').addEventListener('click', () => {
-			if (sortDirection.potentialHazard === true) {
-				sortArray(asteroidsArray, 'potentialHazard', true);
-				sortDirection.potentialHazard = false;	// flip the direction for next sort
-			}
-			else {
-				sortArray(asteroidsArray, 'potentialHazard', false);
-				sortDirection.potentialHazard = true;
-			}
-			renderAsteroidData(asteroidsArray);
-		});
-		
-		document.getElementById('ast-date').addEventListener('click', () => {
-			if (sortDirection.date === true) {
-				sortArray(asteroidsArray, 'date', true);
-				sortDirection.date = false;	// flip the direction for next sort
-			}
-			else {
-				sortArray(asteroidsArray, 'date', false);
-				sortDirection.date = true;
-			}
-			renderAsteroidData(asteroidsArray);
-		});
-
-		document.getElementById('ast-distance').addEventListener('click', () => {
-			if (sortDirection.closeApproachDistance === true) {
-				sortArray(asteroidsArray, 'closeApproachDistance', true);
-				sortDirection.closeApproachDistance = false;	// flip the direction for next sort
-			}
-			else {
-				sortArray(asteroidsArray, 'closeApproachDistance', false);
-				sortDirection.closeApproachDistance = true;
-			}
-			renderAsteroidData(asteroidsArray);
-		});
-
-		document.getElementById('ast-velocity').addEventListener('click', () => {
-			if (sortDirection.closeApproachVelocity === true) {
-				sortArray(asteroidsArray, 'closeApproachVelocity', true);
-				sortDirection.closeApproachVelocity = false;	// flip the direction for next sort
-			}
-			else {
-				sortArray(asteroidsArray, 'closeApproachVelocity', false);
-				sortDirection.closeApproachVelocity = true;
-			}
-			renderAsteroidData(asteroidsArray);
-		});
-
 	}
+	
+	const changeWeek = function _changeWeek(value) {
+		date.from = add(date.from, {weeks: value});
+		date.to = add(date.to, {weeks: value});
+		dateFromString = format(date.from, 'yyyy-MM-dd');
+		let dateToString = format(date.to, 'yyyy-MM-dd');
+		log(dateFromString);
+		log(dateToString);
+		log('changeWeek');
+	}
+	
+	const addDateClickEvents = function _addDateClickEvents() {
+		document.getElementById('prev-7').addEventListener('click', function() {
+			changeWeek(-1);
+		});
+
+		document.getElementById('next-7').addEventListener('click', function () {
+			changeWeek(1);
+		});
+	}
+
+	addDateClickEvents();
 	
 	function createQuery(start, end) {
 		const url = 'https://api.nasa.gov/neo/rest/v1/feed?';
@@ -131,6 +107,7 @@ const main = function _main() {
 		return url+'start_date='+start+'&end_date='+end+'&api_key='+key;
 	}
 	
+	// asteroidsArray is what is used to display the data
 	function fillAsteroidsArray(response) {
 		
 		const asteroidsArray = [];
@@ -336,10 +313,7 @@ const main = function _main() {
 	}
 	
 	function log(obj) {
-	//	if (typeof obj === 'string')
-	//		getLog().innerText += obj + '\n';
-	//	else
-			console.log(obj);
+		console.log(obj);
 	}
 
 }
