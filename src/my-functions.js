@@ -20,3 +20,34 @@ export function twoDecPlaces(value) {
 export function log(obj) {
 	console.log(obj);
 }
+
+export function sortArray(array, property, direction) {
+	if (typeof property === 'number') {
+		if (direction) {
+			array.sort(function(a, b) {
+				return a[property] - b[property];
+			});
+		}
+		else {
+			array.sort(function(a, b) {
+				return b[property] - a[property];
+			});		
+		}
+	}
+	else if (typeof property === 'string') {
+		if (direction) {
+			array.sort(function(a, b) {
+				if (a[property] < b[property]) return -1;
+				if (a[property] > b[property]) return 1;
+				return 0;
+			});
+		}
+		else {
+			array.sort(function(a, b) {
+				if (a[property] < b[property]) return 1;
+				if (a[property] > b[property]) return -1;
+				return 0;
+			});
+		}
+	}
+}

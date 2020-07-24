@@ -9,6 +9,7 @@ body {
 	border-radius: 5px;
 }
 
+
 #top-bar {
 	display: grid;
 	grid-template-columns: 5fr 1fr 1fr;	
@@ -20,12 +21,32 @@ body {
 	font-weight: bold;
 }
 
-.button {
-	background-color: rgb(194, 224, 255);
+button {
+	outline: none;
 	margin: 5px;
+	padding: 7px;
+	border: 0;
+	background: transparent;
+	background-color: rgb(194, 224, 255);
+	box-shadow: 0px 0px 1px 0px rgba(0,0,0,0.75);
 }
 
-.button:hover {
+button:focus {
+	outline: solid;
+}
+
+.week-button {
+}
+
+.week-button:hover {
+	background-color: khaki;
+}
+
+.sort-button {
+	cursor: pointer;
+}
+
+.sort-button:hover {
 	background-color: khaki;
 }
 
@@ -62,12 +83,4 @@ body {
 
 .cell-highlight {
 	background-color: rgb(255, 198, 198);
-}
-
-.sort-button {
-	cursor: pointer;
-}
-
-.sort-button:hover {
-	background-color: khaki;
 }

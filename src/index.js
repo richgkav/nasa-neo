@@ -1,26 +1,28 @@
 // eueuMFXBvagQGzpTAwu5yZr4OHH2TK5q6RECbwu0
 // https://api.nasa.gov/neo/rest/v1/feed?start_date=START_DATE&end_date=END_DATE&api_key=API_KEY
-
 // https://api.nasa.gov/neo/rest/v1/feed?start_date=2015-09-07&end_date=2015-09-08&api_key=DEMO_KEY
 
 import "./index.css";
-import {format, add} from 'date-fns';
+import {format, add, startOfDay, addDays, endOfDay} from 'date-fns';
 import {queryNeoApi} from './api-query';
-import {renderAsteroidData} from './render-data'
+import {renderAsteroidData, renderTitle} from './render-data'
 import {log} from './my-functions';
-import {renderTitle} from './render-data';
+import {sortArray} from './my-functions';
 
 const main = function _main() {
 
-	let dateFromString = '2020-07-01';
-	let dateToString = '2020-07-08';
-
-	let asteroidsArray = [];
+	const _dateNow = new Date();
+	const _sevenDaysTime = addDays(_dateNow, 7);
 
 	let date = {
-		from: new Date(dateFromString + ' 00:00:00'),
-		to: new Date(dateToString + ' 23:59:59'),
+		from: startOfDay(_dateNow),
+		to: endOfDay(_sevenDaysTime),
 	};
+
+	let dateFromString = format(date.from, 'yyyy-MM-dd');
+	let dateToString = format(date.to, 'yyyy-MM-dd');
+
+	let asteroidsArray = [];
 
 	renderTitle(dateFromString, dateToString);
 	queryNeoApi(dateFromString, dateToString, asteroidsArray);
@@ -84,46 +86,6 @@ const main = function _main() {
 	}
 
 	addDateClickEvents();
-		
-
-	function sortArray(array, property, direction) {
-		if (typeof property === 'number') {
-			if (direction) {
-				array.sort(function(a, b) {
-					return a[property] - b[property];
-				});
-			}
-			else {
-				array.sort(function(a, b) {
-					return b[property] - a[property];
-				});		
-			}
-		}
-		else if (typeof property === 'string') {
-			if (direction) {
-				array.sort(function(a, b) {
-					if (a[property] < b[property]) return -1;
-					if (a[property] > b[property]) return 1;
-					return 0;
-				});
-			}
-			else {
-				array.sort(function(a, b) {
-					if (a[property] < b[property]) return 1;
-					if (a[property] > b[property]) return -1;
-					return 0;
-				});
-			}
-		}
-	}
-	
-	// ---------------------------------------------------------------------------//
-	
-// ---------------------------------------------------------------------------//
-
-	
-
-
 }
 
 window.onload = main;
